@@ -1,0 +1,65 @@
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin_user
+      MONGO_INITDB_ROOT_PASSWORD: web3
+    ports:
+      - "27017:27017"
+    networks:
+      - mongo-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mongoclient:
+    image: alpine/mongosh
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - mongo-network
+    command: ["tail", "-f", "/dev/null"]
+    restart: always
+
+  calculadora:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # Si mantienes image:, añade pull_policy: never para evitar pull
+    # image: calculadora-fast-api:latest
+    # pull_policy: never
+    environment:
+      MONGO_URL: mongodb://admin_user:web3@mongo:27017/?authSource=admin
+    ports:
+      - "8089:8000"
+    networks:
+      - mongo-network
+    volumes:
+      - ./backend:/app
+    restart: always
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+    - "3000:3000"
+    volumes:
+    - ./frontend:/app
+    - /app/node_modules
+    environment:
+    - CHOKIDAR_USEPOLLING=true
+    depends_on:
+    - calculadora
+    networks:
+    - mongo-network
+
+
+networks:
+  mongo-network:
+    driver: bridge
