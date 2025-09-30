@@ -137,7 +137,7 @@ function App() {
                   onChange={(e) => updateNumber(idx, e.target.value)}
                   placeholder={`Número ${idx + 1}`}
                 />
-                {numbers.length > 1 && (
+                {numbers.length > 2 && (
                   <button className="remove" onClick={() => removeNumber(idx)} title="Quitar">
                     ✕
                   </button>
