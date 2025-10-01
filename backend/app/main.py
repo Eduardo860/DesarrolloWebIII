@@ -48,10 +48,6 @@ def _validate_non_negative(op: str, numbers: List[float]):
         _err_negatives(op, numbers)
 
 def _parse_iso(dt_str: Optional[str]) -> Optional[datetime]:
-    """
-    Parse simple de ISO-8601 (acepta 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SS' con/sin 'Z').
-    Si no parsea, regresa None (puedes cambiarlo a 400 si prefieres).
-    """
     if not dt_str:
         return None
     try:
@@ -142,21 +138,6 @@ def historial(
 
 @app.post("/operaciones/lote")
 def operaciones_lote(payload: dict = Body(...)):
-    """
-    Espera:
-    {
-      "operations": [
-        {"type":"sum|sub|mul|div","numbers":[...]},
-        ...
-    ]}
-    Devuelve:
-    {
-      "results":[
-        {"type":"sum","result":9},
-        {"type":"div","error":{...}}
-      ]
-    }
-    """
     ops = payload.get("operations", [])
     if not isinstance(ops, list) or len(ops) == 0:
         raise HTTPException(

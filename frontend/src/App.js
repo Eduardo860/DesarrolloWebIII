@@ -28,7 +28,7 @@ function App() {
   const [dateTo, setDateTo] = useState("");     
   const [limit, setLimit] = useState(20);
 
-  // Helpers
+
   const toFloatArray = (arr) =>
     arr
       .filter((x) => x !== "" && x !== null && x !== undefined)
@@ -42,7 +42,7 @@ function App() {
     } catch { return String(value); }
   };
 
-  // ---- API calls
+
   const calcular = async () => {
     setError("");
     setResultado(null);

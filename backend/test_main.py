@@ -18,10 +18,6 @@ except ImportError:
 
 @pytest.fixture(autouse=True)
 def mock_mongo(monkeypatch):
-    """
-    Parchea la colección global usada por la app para que todo
-    vaya a una DB en memoria (mongomock). No toca tu Mongo real.
-    """
     client = mongomock.MongoClient()
     mock_db = client[db.DB_NAME]
     mock_hist = mock_db[db.COLLECTION]
@@ -154,9 +150,9 @@ def test_historial_basico(client):
 
 def test_historial_filtros_tipo_fecha_y_orden(client):
 
-    client.post("/calculadora/mul", json={"numbers": [2, 3]})      # 6
-    client.post("/calculadora/mul", json={"numbers": [5, 5]})      # 25
-    client.post("/calculadora/sum", json={"numbers": [10, 1]})     # 11
+    client.post("/calculadora/mul", json={"numbers": [2, 3]})      
+    client.post("/calculadora/mul", json={"numbers": [5, 5]})      
+    client.post("/calculadora/sum", json={"numbers": [10, 1]})     
 
     now = iso_now()
 
@@ -185,10 +181,10 @@ def test_historial_filtros_tipo_fecha_y_orden(client):
 def test_batch_mixto(client):
     payload = {
         "operations": [
-            {"type": "sum", "numbers": [2, 3, 4]},   # ok -> 9
-            {"type": "div", "numbers": [10, 0]},     # error 403
-            {"type": "mul", "numbers": [2, -5]},     # error 400
-            {"type": "sub", "numbers": [20, 3, 2]}   # ok -> 15
+            {"type": "sum", "numbers": [2, 3, 4]},   
+            {"type": "div", "numbers": [10, 0]},     
+            {"type": "mul", "numbers": [2, -5]},     
+            {"type": "sub", "numbers": [20, 3, 2]}   
         ]
     }
     r = client.post("/operaciones/lote", json=payload)
@@ -236,16 +232,16 @@ def test_division_por_cero_da_403(client):
 def test_batch_con_operaciones_invalidas(client):
     payload = {
         "operations": [
-            {"type": "sum", "numbers": [1, -2]},  # negativo -> 400
-            {"type": "div", "numbers": [5, 0]},   # div/0 -> 403
-            {"type": "foo", "numbers": [1, 2]}    # tipo inválido -> 400
+            {"type": "sum", "numbers": [1, -2]},  
+            {"type": "div", "numbers": [5, 0]},   
+            {"type": "foo", "numbers": [1, 2]}    
         ]
     }
     r = client.post("/operaciones/lote", json=payload)
     assert r.status_code == 200
     res = r.json()["results"]
 
-    # Verificamos que todos traen "error"
+
     assert any(item["error"]["code"] == 400 for item in res if "error" in item)
     assert any(item["error"]["code"] == 403 for item in res if "error" in item)
     assert any(item["error"]["message"] == "Tipo de operación no soportado" for item in res if "error" in item)
