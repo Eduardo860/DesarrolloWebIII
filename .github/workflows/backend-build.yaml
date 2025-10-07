@@ -25,7 +25,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Dtermine image tags
+      - name: Determine image tags
         id: vars
         run: |
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
