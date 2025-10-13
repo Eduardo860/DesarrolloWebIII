@@ -1,17 +1,21 @@
-name: Build & Push Frontend
+name: Build & Push Backend
+
 on:
   push:
     branches: ["main"]
     tags: ["v*.*.*"]
-    paths: ["frontend/**"]
+    paths: ["backend/**"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions: { contents: read, packages: write }
+
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -20,14 +24,15 @@ jobs:
       - name: Determine image name and tag
         run: |
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          echo "IMAGE_NAME=ghcr.io/${REPO_LOWER}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=ghcr.io/${REPO_LOWER}/backend" >> $GITHUB_ENV
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-            echo "TAG=frontend-${GITHUB_REF_NAME}" >> $GITHUB_ENV      # v1.2.3 -> frontend-v1.2.3
+            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
           else
-            echo "TAG=frontend-latest" >> $GITHUB_ENV                  # main -> frontend-latest
+            echo "TAG=latest" >> $GITHUB_ENV
           fi
 
       - name: Build
-        run: docker build -t "${{ env.IMAGE_NAME }}:${{ env.TAG }}" ./frontend
+        run: docker build -t "${{ env.IMAGE_NAME }}:${{ env.TAG }}" ./backend
+
       - name: Push
         run: docker push "${{ env.IMAGE_NAME }}:${{ env.TAG }}"
