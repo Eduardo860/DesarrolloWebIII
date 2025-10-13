@@ -64,3 +64,6 @@ def obtener_historial(limit: int = 20):
     except Exception as e:
         print("⚠️ No se pudo leer de Mongo:", e)
         return {"historial": []}
+    
+
+    ##Cambio para ver Backend Workflow
