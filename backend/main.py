@@ -4,9 +4,11 @@ import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient, DESCENDING
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -15,6 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Config Mongo
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://admin_user:web3@mongo:27017/?authSource=admin")
 mongo_client = None
 collection_historial = None
@@ -28,6 +31,8 @@ try:
 except Exception as e:
     print("⚠️ Mongo no disponible aún:", e)
 
+
+# Función auxiliar
 def serialize_doc(doc: dict) -> dict:
     out = dict(doc)
     _id = out.get("_id")
@@ -38,6 +43,8 @@ def serialize_doc(doc: dict) -> dict:
         out["date"] = date.isoformat()
     return out
 
+
+# Endpoints
 @app.get("/")
 def health():
     return {"status": "ok", "mongo": bool(collection_historial)}
@@ -64,5 +71,7 @@ def obtener_historial(limit: int = 20):
     except Exception as e:
         print("⚠️ No se pudo leer de Mongo:", e)
         return {"historial": []}
-    
-    ##Cambio para ver Backend Workflow
+
+
+# 🚀 Instrumentación Prometheus (al final y al nivel raíz)
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
